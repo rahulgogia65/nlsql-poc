@@ -1,0 +1,58 @@
+<div class="container mx-auto py-8 px-4">
+  <div class="mb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-3xl font-bold">Query History</h1>
+      <div class="flex space-x-2">
+        <.link navigate={~p"/nlsql"} class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+          Back to Query Interface
+        </.link>
+        <button 
+          phx-click="clear_history" 
+          class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+          data-confirm="Are you sure you want to clear all history?"
+        >
+          Clear History
+        </button>
+      </div>
+    </div>
+    
+    <p class="text-gray-600 mb-4">
+      View and rerun your previous natural language queries.
+    </p>
+  </div>
+  
+  <%= if Enum.empty?(@history) do %>
+    <div class="bg-gray-100 p-6 rounded-lg text-center">
+      <p class="text-gray-500">No query history available.</p>
+    </div>
+  <% else %>
+    <div class="space-y-4">
+      <%= for query <- @history do %>
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="flex items-start justify-between">
+            <div>
+              <h3 class="font-semibold text-lg mb-1"><%= query.query %></h3>
+              <p class="text-sm text-gray-500 mb-2">
+                <span title={DateTime.to_string(query.timestamp)}>
+                  <%= format_timestamp(query.timestamp) %>
+                </span>
+                • <%= query.row_count %> results
+              </p>
+            </div>
+            <button 
+              phx-click="re_run" 
+              phx-value-query={query.query}
+              class="px-3 py-1 text-sm bg-indigo-600 text-white hover:bg-indigo-700 rounded"
+            >
+              Run Again
+            </button>
+          </div>
+          
+          <div class="bg-gray-800 text-white p-3 rounded-md overflow-x-auto text-sm">
+            <pre><code><%= query.sql %></code></pre>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div> 
