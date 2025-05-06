@@ -23,6 +23,7 @@ defmodule NlsqlWeb.Router do
     live "/nlsql", NlsqlLive.Index, :index
     live "/nlsql/history", NlsqlLive.History, :index
     live "/nlsql/schema", NlsqlLive.Schema, :index
+    live "/nlsql/visualization", NlsqlLive.Visualization, :index
   end
 
   # API routes for NL to SQL service

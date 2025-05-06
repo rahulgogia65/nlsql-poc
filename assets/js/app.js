@@ -22,14 +22,10 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
-// Include Chart.js library
-import Chart from 'chart.js/auto';
-
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken},
-  hooks: Hooks
+  params: {_csrf_token: csrfToken}
 })
 
 // Show progress bar on live navigation and form submits
@@ -46,53 +42,4 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
-// Define hooks for LiveView
-let Hooks = {};
-
-// Chart hook for displaying visualizations
-Hooks.ChartHook = {
-  mounted() {
-    this.initChart();
-    
-    // Set up listener for when chart config changes
-    this.handleEvent("update-chart", ({ config }) => {
-      this.updateChart(config);
-    });
-  },
-  
-  initChart() {
-    const canvas = this.el;
-    const config = JSON.parse(canvas.dataset.chartConfig);
-    
-    // Destroy existing chart if it exists
-    if (this.chart) {
-      this.chart.destroy();
-    }
-    
-    // Create the new chart
-    this.chart = new Chart(canvas, config);
-  },
-  
-  updateChart(config) {
-    // Destroy existing chart
-    if (this.chart) {
-      this.chart.destroy();
-    }
-    
-    // Create new chart with updated config
-    this.chart = new Chart(this.el, config);
-  },
-  
-  destroyed() {
-    // Clean up chart when element is removed
-    if (this.chart) {
-      this.chart.destroy();
-    }
-  }
-};
-
-// Export hooks
-export const liveSocketOptions = {
-  hooks: Hooks
-};
 

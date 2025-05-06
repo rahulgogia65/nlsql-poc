@@ -1,0 +1,18 @@
+<div class="container mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-6">Data Visualization</h1>
+  
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <.tucan_visualization
+      id="main-chart"
+      data={@chart_data}
+      options={@chart_options}
+      class="w-full h-64"
+    />
+  </div>
+  
+  <div class="mt-6">
+    <p class="text-sm text-gray-600">
+      This visualization is powered by the Elixir Tucan library.
+    </p>
+  </div>
+</div> 
