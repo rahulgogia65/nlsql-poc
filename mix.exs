@@ -59,7 +59,8 @@ defmodule Nlsql.MixProject do
       {:hermes_mcp, "~> 0.3.12"},
       {:httpoison, "~> 2.2"},
       {:tucan, "~> 0.4.1"},
-      {:earmark, "~> 1.4"}
+      {:earmark, "~> 1.4"},
+      {:openai_ex, "~> 0.9.7"}
     ]
   end
 

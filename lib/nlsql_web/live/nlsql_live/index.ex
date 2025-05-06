@@ -14,7 +14,10 @@ defmodule NlsqlWeb.NlsqlLive.Index do
       |> assign(:error, nil)
       |> assign(:query_history, [])
       |> assign(:show_sql, false)
-      |> assign(:active_chart, nil)}
+      |> assign(:active_chart, nil)
+      |> assign(:sample_chart_type, "bar")
+      |> assign(:sample_sales_data, sample_sales_data())
+      |> assign(:sample_product_data, sample_product_data())}
   end
 
   @impl true
@@ -68,8 +71,20 @@ defmodule NlsqlWeb.NlsqlLive.Index do
           else
             nil
           end
+        IO.inspect(active_chart, label: "...........active_chart")
         {:noreply, assign(socket, :active_chart, active_chart)}
     end
+  end
+
+  @impl true
+  def handle_event("show-sample", %{"chart-type" => chart_type}, socket) do
+    {:noreply, assign(socket, :sample_chart_type, chart_type)}
+  end
+
+  @impl true
+  def handle_event("tucan-visibility-change", %{"id" => _id, "visible" => _visible}, socket) do
+    # Forward to the appropriate LiveComponent if needed
+    {:noreply, socket}
   end
 
   @impl true
@@ -115,5 +130,26 @@ defmodule NlsqlWeb.NlsqlLive.Index do
       {:ok, formatted_data} -> formatted_data
       {:error, _} -> ""
     end
+  end
+
+  # Sample data for Tucan charts
+  defp sample_sales_data do
+    [
+      %{label: "Jan", value: 12500},
+      %{label: "Feb", value: 17800},
+      %{label: "Mar", value: 14200},
+      %{label: "Apr", value: 19500},
+      %{label: "May", value: 22300},
+      %{label: "Jun", value: 25100}
+    ]
+  end
+
+  defp sample_product_data do
+    [
+      %{label: "Product A", value: 32},
+      %{label: "Product B", value: 45},
+      %{label: "Product C", value: 27},
+      %{label: "Product D", value: 18}
+    ]
   end
 end

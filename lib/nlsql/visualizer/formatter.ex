@@ -51,33 +51,48 @@ defmodule Nlsql.Visualizer.Formatter do
   - Formatted data for chart visualization
   """
   def format_for_chart(results, chart_type, x_axis, y_axis) do
-    data = Enum.map(results.results, fn row ->
-      x_value = Map.get(row, x_axis)
-      y_value =
-        case Map.get(row, y_axis) do
-          value when is_binary(value) ->
-            case Float.parse(value) do
-              {num, _} -> num
-              :error -> 0
-            end
-          value when is_number(value) -> value
-          _ -> 0
-        end
+    # Handle nil or empty results
+    if !results || !Map.has_key?(results, :results) || Enum.empty?(results.results) ||
+       !x_axis || !y_axis ||
+       (is_list(results.columns) && (!Enum.member?(results.columns, x_axis) || !Enum.member?(results.columns, y_axis))) do
+      # Return a minimal valid structure that will be caught by the chart generators
+      %{
+        type: chart_type,
+        data: [],
+        labels: %{
+          x: x_axis && format_column_name(x_axis) || "X Axis",
+          y: y_axis && format_column_name(y_axis) || "Y Axis"
+        }
+      }
+    else
+      data = Enum.map(results.results, fn row ->
+        x_value = Map.get(row, x_axis)
+        y_value =
+          case Map.get(row, y_axis) do
+            value when is_binary(value) ->
+              case Float.parse(value) do
+                {num, _} -> num
+                :error -> 0
+              end
+            value when is_number(value) -> value
+            _ -> 0
+          end
+
+        %{
+          "x" => format_value(x_value),
+          "y" => y_value
+        }
+      end)
 
       %{
-        "x" => format_value(x_value),
-        "y" => y_value
+        type: chart_type,
+        data: data,
+        labels: %{
+          x: format_column_name(x_axis),
+          y: format_column_name(y_axis)
+        }
       }
-    end)
-
-    %{
-      type: chart_type,
-      data: data,
-      labels: %{
-        x: format_column_name(x_axis),
-        y: format_column_name(y_axis)
-      }
-    }
+    end
   end
 
   @doc """

@@ -89,53 +89,58 @@ defmodule Nlsql.Visualizer.ChartGenerator do
   - data: The formatted data for chart visualization
 
   ## Returns
-  - Chart.js configuration for a bar chart
+  - Chart.js configuration for a bar chart or nil if data is empty
   """
   def generate_bar_chart(data) do
-    labels = Enum.map(data.data, fn point -> point["x"] end)
-    values = Enum.map(data.data, fn point -> point["y"] end)
+    # Return nil if data is empty or invalid
+    if !data || !Map.has_key?(data, :data) || Enum.empty?(data.data) do
+      nil
+    else
+      labels = Enum.map(data.data, fn point -> point["x"] end)
+      values = Enum.map(data.data, fn point -> point["y"] end)
 
-    %{
-      type: "bar",
-      data: %{
-        labels: labels,
-        datasets: [
-          %{
-            label: data.labels.y,
-            data: values,
-            backgroundColor: generate_colors(length(values)),
-            borderWidth: 1
-          }
-        ]
-      },
-      options: %{
-        responsive: true,
-        plugins: %{
-          legend: %{
-            position: "top"
-          },
-          title: %{
-            display: true,
-            text: "#{data.labels.y} by #{data.labels.x}"
-          }
+      %{
+        type: "bar",
+        data: %{
+          labels: labels,
+          datasets: [
+            %{
+              label: data.labels.y,
+              data: values,
+              backgroundColor: generate_colors(length(values)),
+              borderWidth: 1
+            }
+          ]
         },
-        scales: %{
-          y: %{
-            beginAtZero: true,
+        options: %{
+          responsive: true,
+          plugins: %{
+            legend: %{
+              position: "top"
+            },
             title: %{
               display: true,
-              text: data.labels.y
+              text: "#{data.labels.y} by #{data.labels.x}"
             }
           },
-          x: %{
-            title: %{
-              display: true,
-              text: data.labels.x
+          scales: %{
+            y: %{
+              beginAtZero: true,
+              title: %{
+                display: true,
+                text: data.labels.y
+              }
+            },
+            x: %{
+              title: %{
+                display: true,
+                text: data.labels.x
+              }
             }
           }
         }
       }
-    }
+    end
   end
 
   @doc """
@@ -145,54 +150,59 @@ defmodule Nlsql.Visualizer.ChartGenerator do
   - data: The formatted data for chart visualization
 
   ## Returns
-  - Chart.js configuration for a line chart
+  - Chart.js configuration for a line chart or nil if data is empty
   """
   def generate_line_chart(data) do
-    labels = Enum.map(data.data, fn point -> point["x"] end)
-    values = Enum.map(data.data, fn point -> point["y"] end)
+    # Return nil if data is empty or invalid
+    if !data || !Map.has_key?(data, :data) || Enum.empty?(data.data) do
+      nil
+    else
+      labels = Enum.map(data.data, fn point -> point["x"] end)
+      values = Enum.map(data.data, fn point -> point["y"] end)
 
-    %{
-      type: "line",
-      data: %{
-        labels: labels,
-        datasets: [
-          %{
-            label: data.labels.y,
-            data: values,
-            fill: false,
-            borderColor: "rgb(75, 192, 192)",
-            tension: 0.1
-          }
-        ]
-      },
-      options: %{
-        responsive: true,
-        plugins: %{
-          legend: %{
-            position: "top"
-          },
-          title: %{
-            display: true,
-            text: "#{data.labels.y} over Time"
-          }
+      %{
+        type: "line",
+        data: %{
+          labels: labels,
+          datasets: [
+            %{
+              label: data.labels.y,
+              data: values,
+              fill: false,
+              borderColor: "rgb(75, 192, 192)",
+              tension: 0.1
+            }
+          ]
         },
-        scales: %{
-          y: %{
-            beginAtZero: true,
+        options: %{
+          responsive: true,
+          plugins: %{
+            legend: %{
+              position: "top"
+            },
             title: %{
               display: true,
-              text: data.labels.y
+              text: "#{data.labels.y} over Time"
             }
           },
-          x: %{
-            title: %{
-              display: true,
-              text: data.labels.x
+          scales: %{
+            y: %{
+              beginAtZero: true,
+              title: %{
+                display: true,
+                text: data.labels.y
+              }
+            },
+            x: %{
+              title: %{
+                display: true,
+                text: data.labels.x
+              }
             }
           }
         }
       }
-    }
+    end
   end
 
   @doc """
@@ -202,37 +212,42 @@ defmodule Nlsql.Visualizer.ChartGenerator do
   - data: The formatted data for chart visualization
 
   ## Returns
-  - Chart.js configuration for a pie chart
+  - Chart.js configuration for a pie chart or nil if data is empty
   """
   def generate_pie_chart(data) do
-    labels = Enum.map(data.data, fn point -> point["x"] end)
-    values = Enum.map(data.data, fn point -> point["y"] end)
+    # Return nil if data is empty or invalid
+    if !data || !Map.has_key?(data, :data) || Enum.empty?(data.data) do
+      nil
+    else
+      labels = Enum.map(data.data, fn point -> point["x"] end)
+      values = Enum.map(data.data, fn point -> point["y"] end)
 
-    %{
-      type: "pie",
-      data: %{
-        labels: labels,
-        datasets: [
-          %{
-            data: values,
-            backgroundColor: generate_colors(length(values)),
-            hoverOffset: 4
-          }
-        ]
-      },
-      options: %{
-        responsive: true,
-        plugins: %{
-          legend: %{
-            position: "top"
-          },
-          title: %{
-            display: true,
-            text: "Distribution of #{data.labels.y}"
+      %{
+        type: "pie",
+        data: %{
+          labels: labels,
+          datasets: [
+            %{
+              data: values,
+              backgroundColor: generate_colors(length(values)),
+              hoverOffset: 4
+            }
+          ]
+        },
+        options: %{
+          responsive: true,
+          plugins: %{
+            legend: %{
+              position: "top"
+            },
+            title: %{
+              display: true,
+              text: "Distribution of #{data.labels.y}"
+            }
           }
         }
       }
-    }
+    end
   end
 
   # Helper functions
@@ -320,4 +335,118 @@ defmodule Nlsql.Visualizer.ChartGenerator do
   end
 
   defp format_column_name(column_name), do: "#{column_name}"
+
+  @doc """
+  Generate configuration for a Tucan bar chart.
+
+  ## Parameters
+  - data: The formatted data for chart visualization
+
+  ## Returns
+  - Tucan configuration for a bar chart or nil if data is empty
+  """
+  def generate_tucan_bar_chart(data) do
+    # Return nil if data is empty or invalid
+    if !data || !Map.has_key?(data, :data) || Enum.empty?(data.data) do
+      nil
+    else
+      # Create data in tabular format required by Tucan
+      tabular_data = Enum.map(data.data, fn point ->
+        %{"category" => point["x"], "value" => point["y"]}
+      end)
+
+      # Calculate dimensions based on data size
+      data_count = length(tabular_data)
+      # Adjust width for more data points
+      width = max(400, min(800, 400 + data_count * 20))
+      # Adjust height to give more space for labels when many data points
+      height = max(300, min(600, 300 + data_count * 10))
+
+      # Create bar chart with tabular data and set dimensions
+      tabular_data
+      Tucan.bar(tabular_data, "category", "value", width: width, height: height)
+      |> Tucan.set_title("#{data.labels.y} by #{data.labels.x}")
+    end
+  end
+
+  @doc """
+  Generate configuration for a Tucan line chart.
+
+  ## Parameters
+  - data: The formatted data for chart visualization
+
+  ## Returns
+  - Tucan configuration for a line chart or nil if data is empty
+  """
+  def generate_tucan_line_chart(data) do
+    # Return nil if data is empty or invalid
+    if !data || !Map.has_key?(data, :data) || Enum.empty?(data.data) do
+      nil
+    else
+      # Create data in tabular format required by Tucan
+      tabular_data = Enum.map(data.data, fn point ->
+        %{"category" => point["x"], "value" => point["y"]}
+      end)
+
+      # Calculate dimensions based on data size
+      data_count = length(tabular_data)
+      # Adjust width for more data points
+      width = max(400, min(800, 400 + data_count * 20))
+      # Adjust height to give more space
+      height = max(300, min(500, 300 + data_count * 5))
+
+      # Create line chart with tabular data and dimensions
+      Tucan.lineplot(tabular_data, "category", "value", width: width, height: height)
+      |> Tucan.set_title("#{data.labels.y} over Time")
+    end
+  end
+
+  @doc """
+  Generate configuration for a Tucan pie chart.
+
+  ## Parameters
+  - data: The formatted data for chart visualization
+
+  ## Returns
+  - Tucan configuration for a pie chart or nil if data is empty
+  """
+  def generate_tucan_pie_chart(data) do
+    # Return nil if data is empty or invalid
+    if !data || !Map.has_key?(data, :data) || Enum.empty?(data.data) do
+      nil
+    else
+      # Create data in tabular format required by Tucan
+      tabular_data = Enum.map(data.data, fn point ->
+        %{"category" => point["x"], "value" => point["y"]}
+      end)
+
+      # For pie charts, we want a more square aspect ratio
+      data_count = length(tabular_data)
+      # Calculate size based on data count, but keep it relatively square
+      size = max(400, min(600, 400 + data_count * 15))
+
+      # Use Tucan for pie chart with appropriate dimensions
+      Tucan.pie(tabular_data, "category", "value", width: size, height: size)
+      |> Tucan.set_title("Distribution of #{data.labels.y}")
+    end
+  end
+
+  @doc """
+  Generate a Tucan chart based on the chart type.
+
+  ## Parameters
+  - data: The formatted data for chart visualization
+  - chart_type: The type of chart to generate ("bar", "line", or "pie")
+
+  ## Returns
+  - Tucan chart configuration or nil if data is empty
+  """
+  def generate_tucan_chart(data, chart_type) do
+    case chart_type do
+      "bar" -> generate_tucan_bar_chart(data)
+      "line" -> generate_tucan_line_chart(data)
+      "pie" -> generate_tucan_pie_chart(data)
+      _ -> generate_tucan_bar_chart(data) # Default to bar chart
+    end
+  end
 end

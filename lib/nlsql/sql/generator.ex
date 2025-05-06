@@ -15,7 +15,6 @@ defmodule Nlsql.SQL.Generator do
   - `{:error, reason}` if generation fails
   """
   def generate(parsed_data, schema) do
-    try do
       intent = Map.get(parsed_data, "intent", "select")
 
       sql_query = case String.downcase(intent) do
@@ -29,20 +28,18 @@ defmodule Nlsql.SQL.Generator do
       case sql_query do
         {:ok, query} -> {:ok, query}
         {:error, reason} -> {:error, reason}
+        res -> res
       end
-    rescue
-      e -> {:error, "Error generating SQL: #{Exception.message(e)}"}
-    end
   end
 
   # Generate a SELECT query
   defp generate_select(parsed_data, _schema) do
-    tables = Map.get(parsed_data, "entities", [])
-    columns = Map.get(parsed_data, "columns", ["*"])
-    filters = Map.get(parsed_data, "filter_conditions", nil)
-    sort = Map.get(parsed_data, "sorting", nil)
-    group_by = Map.get(parsed_data, "grouping", nil)
-    limit = Map.get(parsed_data, "limit", nil)
+    tables = Map.get(parsed_data, "Entities", [])
+    columns = Map.get(parsed_data, "Columns", ["*"])
+    filters = Map.get(parsed_data, "FilterConditions", nil)
+    sort = Map.get(parsed_data, "Sorting", nil)
+    group_by = Map.get(parsed_data, "Grouping", nil)
+    limit = Map.get(parsed_data, "Limit", nil)
 
     # Build the SELECT clause
     select_clause = "SELECT #{format_columns(columns)}"

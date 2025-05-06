@@ -6,6 +6,8 @@ defmodule Nlsql.NLP.Parser do
 
   alias Nlsql.NLP.Schema
 
+  @openai_key Application.compile_env(:openai_ex, :api_key)
+
   @doc """
   Process the natural language query using the OpenAI API.
 
@@ -39,27 +41,35 @@ defmodule Nlsql.NLP.Parser do
     7. The identified intent (select, insert, update, delete)
     """
 
-    try do
-      result = OpenAI.chat_completion(
+    # Fetch openai key from config
+    openai = OpenaiEx.new(@openai_key)
+
+    completion =
+      OpenaiEx.Chat.Completions.new(
         model: "gpt-4o",
         messages: [
-          %{role: "system", content: "You are a specialized NLP engine for translating natural language to SQL query parameters. Respond only with valid JSON."},
+          %{
+            role: "system",
+            content:
+              "You are a specialized NLP engine for translating natural language to SQL query parameters. Respond only with valid JSON."
+          },
           %{role: "user", content: prompt}
         ],
         response_format: %{type: "json_object"}
       )
 
-      case result do
-        {:ok, %{choices: [%{message: %{content: content}} | _]}} ->
-          parsed_json = Jason.decode!(content)
-          {:ok, parsed_json}
-        {:error, %{message: message}} ->
-          {:error, "OpenAI API error: #{message}"}
-        _ ->
-          {:error, "Unexpected response from OpenAI"}
-      end
-    rescue
-      e -> {:error, "Error processing query: #{Exception.message(e)}"}
+    result = OpenaiEx.Chat.Completions.create(openai, completion)
+
+    case result do
+      {:ok, %{"choices" => [%{"message" => %{"content" => content}} | _]}} ->
+        parsed_json = Jason.decode!(content)
+        {:ok, parsed_json}
+
+      {:error, %{"message": message}} ->
+        {:error, "OpenAI API error: #{message}"}
+
+      _ ->
+        {:error, "Unexpected response from OpenAI"}
     end
   end
 end

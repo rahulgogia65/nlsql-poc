@@ -24,6 +24,18 @@ defmodule NlsqlWeb.Router do
     live "/nlsql/history", NlsqlLive.History, :index
     live "/nlsql/schema", NlsqlLive.Schema, :index
     live "/nlsql/visualization", NlsqlLive.Visualization, :index
+
+    # Tucan Chart Demo
+    live "/tucan-demo", TucanDemoLive, :index
+
+    # Vega-Lite Chart Demo
+    live "/vega-lite-demo", VegaLiteDemoLive, :index
+
+    # Survey Results Demo
+    live "/survey-results", SurveyResultsLive, :index
+
+    # Chart controller route
+    get "/charts/:chart_data", ChartController, :show
   end
 
   # API routes for NL to SQL service

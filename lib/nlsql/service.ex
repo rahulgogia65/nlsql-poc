@@ -10,6 +10,8 @@ defmodule Nlsql.Service do
   alias Nlsql.Visualizer.Formatter
   alias Nlsql.Visualizer.ChartGenerator
 
+  @openai_key Application.compile_env(:openai_ex, :api_key)
+
   @doc """
   Process a natural language query to SQL.
 
@@ -22,10 +24,10 @@ defmodule Nlsql.Service do
   """
   def process_query(query, repo) do
     with {:ok, schema} <- Schema.parse_schema(repo),
-         {:ok, parsed_data} <- Parser.parse(query, schema),
-         {:ok, sql_query} <- Generator.generate(parsed_data, schema),
+        #  {:ok, sql_query} <- generate_sql_from_openai(query, schema),
+        #  IO.inspect(sql_query, label: ".....sql_query"),
+        sql_query = "SELECT title, total_visits FROM page_metrics ORDER BY total_visits DESC LIMIT 3;",
          {:ok, results} <- Executor.execute(sql_query, repo) do
-
       # Format results for visualization
       table_data = Formatter.format_for_table(results)
 
@@ -63,7 +65,6 @@ defmodule Nlsql.Service do
       # Return comprehensive result
       {:ok, %{
         original_query: query,
-        parsed_data: parsed_data,
         sql_query: sql_query,
         results: results.results,
         columns: results.columns,
@@ -73,6 +74,61 @@ defmodule Nlsql.Service do
       }}
     else
       {:error, reason} -> {:error, reason}
+    end
+  end
+
+  @doc """
+  Generate SQL directly from OpenAI based on natural language query.
+
+  ## Parameters
+  - query: The natural language query
+  - schema: The database schema information
+
+  ## Returns
+  - {:ok, sql_query} if successful
+  - {:error, reason} if generation fails
+  """
+  def generate_sql_from_openai(query, schema) do
+    schema_description = Schema.to_description(schema)
+
+    prompt = """
+    Given the following database schema:
+    #{schema_description}
+
+    Convert this natural language query directly to a valid SQL query:
+    "#{query}"
+
+    Return only the SQL query without any explanation or markdown formatting.
+    Ensure the query follows standard SQL syntax and uses proper table/column names from the schema.
+    """
+
+    # Create OpenAI client
+    openai = OpenaiEx.new(@openai_key)
+
+    completion =
+      OpenaiEx.Chat.Completions.new(
+        model: "gpt-4o",
+        messages: [
+          %{
+            role: "system",
+            content:
+              "You are a specialized SQL generation engine that translates natural language to SQL queries. Respond only with the valid SQL query, nothing else."
+          },
+          %{role: "user", content: prompt}
+        ]
+      )
+
+    case OpenaiEx.Chat.Completions.create(openai, completion) do
+      {:ok, %{"choices" => [%{"message" => %{"content" => content}} | _]}} ->
+        # Trim the content to remove any potential whitespace/newlines
+        sql_query = String.trim(content)
+        {:ok, sql_query}
+
+      {:error, %{"message" => message}} ->
+        {:error, "OpenAI API error: #{message}"}
+
+      _unexpected ->
+        {:error, "Unexpected response from OpenAI"}
     end
   end
 
