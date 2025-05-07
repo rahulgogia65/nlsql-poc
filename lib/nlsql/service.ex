@@ -3,9 +3,7 @@ defmodule Nlsql.Service do
   Main service module that coordinates the NLP to SQL workflow.
   """
 
-  alias Nlsql.NLP.Parser
   alias Nlsql.NLP.Schema
-  alias Nlsql.SQL.Generator
   alias Nlsql.SQL.Executor
   alias Nlsql.Visualizer.Formatter
   alias Nlsql.Visualizer.ChartGenerator
@@ -24,9 +22,8 @@ defmodule Nlsql.Service do
   """
   def process_query(query, repo) do
     with {:ok, schema} <- Schema.parse_schema(repo),
-        #  {:ok, sql_query} <- generate_sql_from_openai(query, schema),
-        #  IO.inspect(sql_query, label: ".....sql_query"),
-        sql_query = "SELECT title, total_visits FROM page_metrics ORDER BY total_visits DESC LIMIT 3;",
+         {:ok, sql_query} <- generate_sql_from_openai(query, schema),
+        # sql_query = "SELECT title, total_visits FROM page_metrics ORDER BY total_visits DESC LIMIT 3;",
          {:ok, results} <- Executor.execute(sql_query, repo) do
       # Format results for visualization
       table_data = Formatter.format_for_table(results)
